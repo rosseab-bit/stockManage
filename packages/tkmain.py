@@ -13,7 +13,7 @@ class stockWindow:
     def __init__(self, window):
         self.window=window
         self.window.title("Stock Manage")
-        # secciones frame
+        # frames
         #
         frame=LabelFrame(self.window, text="Administrar")
         frame.grid(row=0, column=0, columnspan=1, pady=10, padx=10)
@@ -25,12 +25,12 @@ class stockWindow:
         frameTable.grid(row=6, column=0, columnspan=6, pady=10, padx=5)
         #
         #
-        # botones de accion
+        # buttons for actions
         ttk.Button(frameButtons, text='Agregar', command=self.addStock, width=30).grid(row=0, column=1, columnspan=2, sticky= W + E)
         ttk.Button(frameButtons, text='Editar', command=self.updateStock).grid(row=1, column=1, columnspan=2, sticky= W + E)
         ttk.Button(frameButtons, text='Borrar', command=self.deleteStock).grid(row=2, column=1, columnspan=2, sticky= W + E)
         #
-        # Defino la tabla
+        # create the table for the items
         frameTable.grid(row=7, column=0, columnspan=6, pady=5)
         self.tree = ttk.Treeview(frameTable, column=("c0", "c1", "c2", "c3"), show='headings', height=20)
         self.tree.grid(row=0)
@@ -46,14 +46,15 @@ class stockWindow:
         #
         #
         # items stock
-        self.stockItems=[]
-        self.loadStock()
+        self.stockItems=[] # list of items will get from data bases
+        self.loadStock() # load items from data base in the table
         self.loadItems()
 
 
 
 
     def alertMessage(self, messageAlert):
+        # message alert for errors
         self.alertwindow=Toplevel()
         self.alertwindow.title="Alerta"
         self.message = Label(self.alertwindow, text = messageAlert, pady=20, padx=20, fg = 'red')
