@@ -27,7 +27,7 @@ class stockWindow:
         #
         # botones de accion
         ttk.Button(frameButtons, text='Agregar', command=self.addStock, width=30).grid(row=0, column=1, columnspan=2, sticky= W + E)
-        ttk.Button(frameButtons, text='Actualizar', command=self.updateStock).grid(row=1, column=1, columnspan=2, sticky= W + E)
+        ttk.Button(frameButtons, text='Editar', command=self.updateStock).grid(row=1, column=1, columnspan=2, sticky= W + E)
         ttk.Button(frameButtons, text='Borrar', command=self.deleteStock).grid(row=2, column=1, columnspan=2, sticky= W + E)
         #
         # Defino la tabla
@@ -42,7 +42,7 @@ class stockWindow:
         self.tree.heading("# 3", text="Precio")
         self.tree.column("# 4", anchor=CENTER)
         self.tree.heading("# 4", text="Codigo")
-        ttk.Button(frameTable, text='Cargar lista de stock', command=self.loadStock, width=30).grid(row=2, column=0, columnspan=2, pady=10)
+        ttk.Button(frameTable, text='Actualizar lista de stock', command=self.loadStock, width=30).grid(row=2, column=0, columnspan=2, pady=10)
         #
         #
         # items stock
@@ -58,7 +58,14 @@ class stockWindow:
         self.alertwindow.title="Alerta"
         self.message = Label(self.alertwindow, text = messageAlert, pady=20, padx=20, fg = 'red')
         self.message.grid(row=9, column=1, columnspan=3, sticky = W + E)
+        ttk.Button(self.alertwindow, text='Aceptar', command=self.closeAlertWindow, width=20).grid(row=10, column=1, columnspan=3, pady=10, padx=70)
+
         return 'out: alert'
+
+    def closeAlertWindow(self):
+        self.alertwindow.destroy()
+        self.alertwindow.update()
+        return 'out: close window'
 
     def getItems(self):
         dataBase=dbSqlite()
@@ -108,9 +115,27 @@ class stockWindow:
         self.inputDescripcion=Entry(frameUpdate)
         self.inputDescripcion.grid(row=4, column=1)
         self.inputDescripcion.insert(10, self.tree.item(self.tree.selection())['values'][0])
-        ttk.Button(frameUpdate, text='Actualizar', command=self.addStock, width=30).grid(row=5, column=0, columnspan=2, sticky= W + E)
-        self.message['text']=''
+        ttk.Button(frameUpdate, text='Guardar', command=self.syncStock, width=30).grid(row=5, column=0, columnspan=2, sticky= W + E)
         return 'out: stock update success'
+
+    def syncStock(self):
+        if int(self.inputCode.get())<=0 or int(self.inputStock.get())<=0 or float(self.inputPrecio.get())<=0 or str(self.inputDescripcion.get())=='':
+            self.alertMessage('Error: Existen campos vacios update.')
+            return 'Error: Existen campos vacios.'
+
+        item={
+                'codigo':self.inputCode.get(),
+                'stock':self.inputStock.get(),
+                'precio':self.inputPrecio.get(),
+                'descripcion':self.inputDescripcion.get()
+                }
+        print(item)
+        database=dbSqlite()
+        database.updateStock(item)
+        self.updateWindow.destroy()
+        self.updateWindow.update()
+        self.loadStock()
+        return 'out: product added'
 
     def loadItems(self):
         deleteItem=self.tree.item(self.tree.selection())['values']
@@ -122,26 +147,28 @@ class stockWindow:
         return 'ok'
 
     def addStock(self):
-        self.updateWindow = Toplevel()
-        self.updateWindow.title="Actualizar Item"
-        frameUpdate=LabelFrame(self.updateWindow, text="Actualizar stock")
+        self.addWindow = Toplevel()
+        self.addWindow.title="Actualizar Item"
+        frameUpdate=LabelFrame(self.addWindow, text="Actualizar stock")
         frameUpdate.grid(row=0, column=0, columnspan=6, pady=10, padx=5)
         # formulario para stock
         Label(frameUpdate, text="Codigo").grid(row=1, column=0)
         self.inputCode=Entry(frameUpdate)
         self.inputCode.grid(row=1, column=1, columnspan=2)
+        self.inputCode.insert(10, 0)
         self.inputCode.focus()
         #
         #
         Label(frameUpdate, text="Stock").grid(row=2, column=0)
         self.inputStock=Entry(frameUpdate)
         self.inputStock.grid(row=2, column=1)
-        #self.inputCount.insert(10, 1)
+        self.inputStock.insert(10, 0)
         #
         #
         Label(frameUpdate, text="Precio").grid(row=3, column=0)
         self.inputPrecio=Entry(frameUpdate)
         self.inputPrecio.grid(row=3, column=1)
+        self.inputPrecio.insert(10, 0)
         #
         #
         Label(frameUpdate, text="Descripcion").grid(row=4, column=0)
@@ -152,9 +179,25 @@ class stockWindow:
         return 'out: add stock success'
 
     def putStock(self):
-        if int(self.inputCode.get())<=0 or int(self.inputStock.get())<=0 or float(self.inputPrecio.get())<=0 or str(self.inputDescripcion.get())=='':
-            self.alertMessage('Error: no seleccionaste ningun item de la lista.')
-            return 'Error: no seleccionaste ningun item de la lista.'
+        dataBase=dbSqlite()
+        codes=dataBase.getCodeSTock()
+        print(codes)
+        if int(self.inputCode.get())<=0:
+            self.alertMessage('Error: Existen campos vacios.')
+            return 'Error: Existen campos vacios.'
+        elif int(self.inputStock.get())<=0:
+            self.alertMessage('Error: Existen campos vacios.')
+            return 'Error: Existen campos vacios.'
+        elif float(self.inputPrecio.get())<=0:
+            self.alertMessage('Error: Existen campos vacios.')
+            return 'Error: Existen campos vacios.'
+        elif not str(self.inputDescripcion.get()):
+            self.alertMessage('Error: Existen campos vacios.')
+            return 'Error: Existen campos vacios.'
+        elif int(self.inputCode.get()) in codes:
+            self.alertMessage('Error: Existen campos vacios.')
+            return 'Error: Existen campos vacios.'
+
         item={
                 'codigo':self.inputCode.get(),
                 'stock':self.inputStock.get(),
@@ -164,6 +207,9 @@ class stockWindow:
         print(item)
         database=dbSqlite()
         database.addItemStock(item)
+        self.addWindow.destroy()
+        self.addWindow.update()
+        self.loadStock()
         return 'out: product added'
 
     def deleteStock(self):
@@ -180,5 +226,4 @@ class stockWindow:
         #
         # recargo vista
         self.loadStock()
-        self.message['text']=''
         return 'ok'

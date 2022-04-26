@@ -32,6 +32,13 @@ class dbSqlite:
             return 'out: Update success'
         except:
             return 'error: query not found'
+    def getCodeSTock(self):
+        getCodes="select * from Stock;"
+        cur=self.sqliteConnection.cursor()
+        cur.execute(getCodes)
+        code=[code[1] for code in cur.fetchall()]
+        return code
+
 
     def deleteDB(self, query):
         try:
@@ -44,13 +51,12 @@ class dbSqlite:
 
     def updateStock(self, producto):
         print('Productos desde Update')
-        print(productos)
+        print(producto)
         cur=self.sqliteConnection.cursor()
-        for item in productos:
-            updateQuery='update Stock set Stock=Stock-%s where Codigo=%s;'%(item[6], item[1])
-            print(updateQuery)
-            cur.execute(updateQuery)
-            self.sqliteConnection.commit()
+        updateQuery='update Stock set Stock=%s, Precio=%s, Descripcion=\'%s\' where Codigo=%s;'%(producto['stock'], producto['precio'], producto['descripcion'], producto['codigo'])
+        print(updateQuery)
+        cur.execute(updateQuery)
+        self.sqliteConnection.commit()
         return 'out: Update success'
 
     def putVentas(self, productos):
