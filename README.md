@@ -16,7 +16,7 @@ This program will help you to manage your stock.
  <p align="center"><img src="src/update_list.png" /></p>
 
 
- ## This software is in develpment. But the basic functions you can use.
+ ## This software is in develpment. But you can use the basic functions.
 
 For questions or recommendations. You can contact me.
 LinkedIn: [Ricardo Benitez]( www.linkedin.com/in/roseabdev)
