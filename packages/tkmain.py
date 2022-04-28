@@ -49,7 +49,7 @@ class stockWindow:
         #
         # create the table for the items
         frameTable.grid(row=7, column=0, columnspan=6, pady=5)
-        self.tree = ttk.Treeview(frameTable, column=("c0", "c1", "c2", "c3"), show='headings', height=20)
+        self.tree = ttk.Treeview(frameTable, column=("c0", "c1", "c2", "c3", "c4", "c5"), show='headings', height=20)
         self.tree.grid(row=0)
         self.tree.column("# 1", anchor=CENTER)
         self.tree.heading("# 1", text="Producto")
@@ -59,6 +59,10 @@ class stockWindow:
         self.tree.heading("# 3", text="Precio")
         self.tree.column("# 4", anchor=CENTER)
         self.tree.heading("# 4", text="Codigo")
+        self.tree.column("# 5", anchor=CENTER)
+        self.tree.heading("# 5", text="Fecha de Compra")
+        self.tree.column("# 6", anchor=CENTER)
+        self.tree.heading("# 6", text="Fecha de Vencimiento")
         ttk.Button(frameTable, text='Actualizar lista de stock', command=self.loadStock, width=30).grid(row=2, column=0, columnspan=2, pady=10)
         #
         #
@@ -89,6 +93,7 @@ class stockWindow:
         dataBase=dbSqlite()
         for item in dataBase.selectDB("select * from Stock;"):
             self.stockItems.append(item)
+        print(self.stockItems)
         return 'out: stock list update'
 
     def searchCode(self, filter):
@@ -133,7 +138,7 @@ class stockWindow:
         for item in self.tree.get_children():
             self.tree.delete(item)
         for item in self.stockItems:
-            self.tree.insert('', 1, text='', value=(item[4], item[2], item[3], item[1]))
+            self.tree.insert('', 1, text='', value=(item[4], item[2], item[3], item[1], item[6], item[5]))
         self.stockItems=[]
         return 'ok'
 
@@ -170,7 +175,21 @@ class stockWindow:
         self.inputDescripcion=Entry(frameUpdate)
         self.inputDescripcion.grid(row=4, column=1)
         self.inputDescripcion.insert(10, self.tree.item(self.tree.selection())['values'][0])
-        ttk.Button(frameUpdate, text='Guardar', command=self.syncStock, width=30).grid(row=5, column=0, columnspan=2, sticky= W + E)
+        #
+        #
+        Label(frameUpdate, text="Fecha de Compra").grid(row=5, column=0)
+        self.inputFechaCompra=Entry(frameUpdate)
+        self.inputFechaCompra.grid(row=5, column=1)
+        self.inputFechaCompra.insert(10, self.tree.item(self.tree.selection())['values'][4])
+        #
+        #
+        Label(frameUpdate, text="Fecha de Vencimiento").grid(row=6, column=0)
+        self.inputFechaVencimiento=Entry(frameUpdate)
+        self.inputFechaVencimiento.grid(row=6, column=1)
+        self.inputFechaVencimiento.insert(10, self.tree.item(self.tree.selection())['values'][5])
+        #
+        #
+        ttk.Button(frameUpdate, text='Guardar', command=self.syncStock, width=30).grid(row=7, column=0, columnspan=2, sticky= W + E)
         return 'out: stock update success'
 
     def syncStock(self):
@@ -182,7 +201,9 @@ class stockWindow:
                 'codigo':self.inputCode.get(),
                 'stock':self.inputStock.get(),
                 'precio':self.inputPrecio.get(),
-                'descripcion':self.inputDescripcion.get()
+                'descripcion':self.inputDescripcion.get(),
+                'fecha_compra':self.inputFechaCompra.get(),
+                'fecha_vencimiento':self.inputFechaVencimiento.get()
                 }
         print(item)
         database=dbSqlite()
@@ -230,7 +251,21 @@ class stockWindow:
         self.inputDescripcion=Entry(frameUpdate)
         self.inputDescripcion.grid(row=4, column=1)
         #self.inputCount.insert(10, 1)
-        ttk.Button(frameUpdate, text='Cargar', command=self.putStock, width=30).grid(row=5, column=0, columnspan=2, sticky= W + E)
+        #
+        #
+        Label(frameUpdate, text="Fecha de Compra").grid(row=5, column=0)
+        self.inputFechaCompra=Entry(frameUpdate)
+        self.inputFechaCompra.grid(row=5, column=1)
+        self.inputFechaCompra.insert(10, self.tree.item(self.tree.selection())['values'][4])
+        #
+        #
+        Label(frameUpdate, text="Fecha de Vencimiento").grid(row=6, column=0)
+        self.inputFechaVencimiento=Entry(frameUpdate)
+        self.inputFechaVencimiento.grid(row=6, column=1)
+        self.inputFechaVencimiento.insert(10, self.tree.item(self.tree.selection())['values'][5])
+        #
+        #
+        ttk.Button(frameUpdate, text='Cargar', command=self.putStock, width=30).grid(row=7, column=0, columnspan=2, sticky= W + E)
         return 'out: add stock success'
 
     def putStock(self):
@@ -257,7 +292,9 @@ class stockWindow:
                 'codigo':self.inputCode.get(),
                 'stock':self.inputStock.get(),
                 'precio':self.inputPrecio.get(),
-                'descripcion':self.inputDescripcion.get()
+                'descripcion':self.inputDescripcion.get(),
+                'fecha_compra':self.inputFechaCompra.get(),
+                'fecha_vencimiento':self.inputFechaVencimiento.get()
                 }
         print(item)
         database=dbSqlite()
