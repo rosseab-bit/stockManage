@@ -15,8 +15,25 @@ class stockWindow:
         self.window.title("Stock Manage")
         # frames
         #
-        frame=LabelFrame(self.window, text="Administrar")
-        frame.grid(row=0, column=0, columnspan=1, pady=10, padx=10)
+        #frame search
+        frameSearch=LabelFrame(self.window, text="Buscar Codigo")
+        frameSearch.grid(row=0, column=0, pady=10)
+        #
+        Label(frameSearch, text="")
+        self.searchStock=Entry(frameSearch)
+        self.searchStock.grid(row=0, column=1)
+        ttk.Button(frameSearch, text="Buscar", width=20, command=lambda: self.loadSearch(self.searchStock.get())).grid(row=1, column=1)
+        #
+        #frame search
+        frameSearchName=LabelFrame(self.window, text="Buscar Nombre")
+        frameSearchName.grid(row=1, column=0, pady=10)
+        #
+        Label(frameSearchName, text="")
+        self.searchStockName=Entry(frameSearchName)
+        self.searchStockName.grid(row=1, column=1)
+        ttk.Button(frameSearchName, text="Buscar", width=20, command=lambda: self.loadSearchName(self.searchStockName.get())).grid(row=2, column=1)
+        #frame=LabelFrame(self.window, text="Administrar")
+        #frame.grid(row=0, column=0, columnspan=1, pady=10, padx=10)
         #
         frameButtons=LabelFrame(self.window, text="Acciones")
         frameButtons.grid(row=0, column=2, columnspan=2, pady=10)
@@ -26,7 +43,7 @@ class stockWindow:
         #
         #
         # buttons for actions
-        ttk.Button(frameButtons, text='Agregar', command=self.addStock, width=30).grid(row=0, column=1, columnspan=2, sticky= W + E)
+        ttk.Button(frameButtons, text='Agregar', command=self.addStock, width=20).grid(row=0, column=1, columnspan=2, sticky= W + E)
         ttk.Button(frameButtons, text='Editar', command=self.updateStock).grid(row=1, column=1, columnspan=2, sticky= W + E)
         ttk.Button(frameButtons, text='Borrar', command=self.deleteStock).grid(row=2, column=1, columnspan=2, sticky= W + E)
         #
@@ -73,6 +90,43 @@ class stockWindow:
         for item in dataBase.selectDB("select * from Stock;"):
             self.stockItems.append(item)
         return 'out: stock list update'
+
+    def searchCode(self, filter):
+        dataBase=dbSqlite()
+        itemsSearch="select * from Stock where Codigo like '%{search}%';".format(search=filter)
+        print(itemsSearch)
+        for item in dataBase.selectDB(itemsSearch):
+            self.stockItems.append(item)
+        self.searchStock.delete(0, END)
+        return 'out: success search code.'
+
+    def loadSearch(self, filter):
+        self.searchCode(filter)
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        for item in self.stockItems:
+            self.tree.insert('', 1, text='', value=(item[4], item[2], item[3], item[1]))
+        self.stockItems=[]
+        return 'ok'
+
+    def searchName(self, filter):
+        dataBase=dbSqlite()
+        itemsSearch="select * from Stock where Descripcion like '%{search}%';".format(search=filter)
+        print(itemsSearch)
+        for item in dataBase.selectDB(itemsSearch):
+            self.stockItems.append(item)
+        self.searchStock.delete(0, END)
+        return 'out: success search code.'
+
+    def loadSearchName(self, filter):
+        self.searchName(filter)
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        for item in self.stockItems:
+            self.tree.insert('', 1, text='', value=(item[4], item[2], item[3], item[1]))
+        self.stockItems=[]
+        return 'ok'
+
 
     def loadStock(self):
         self.getItems()
